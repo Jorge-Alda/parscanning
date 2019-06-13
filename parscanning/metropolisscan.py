@@ -20,11 +20,14 @@ class MetropolisScan(Scan):
 				self._newpoint()
 			self.variances = self.variances/10
 		N = 0
+		Ntot = 0
 		while N < Nvalid:
+			Ntot += 1
 			if self._newpoint():
 				N += 1
 				self.points.append(self.point)
 				self.lh_list.append(self.lh)
+		self.increasecounter(Ntot)
 
 
 	def _newpoint(self):
@@ -33,7 +36,6 @@ class MetropolisScan(Scan):
 			p0 = self.point + np.random.randn(self.Npars) * self.variances
 			valid = self.inthebox(p0)
 		lh0 = self.likelihood(p0)
-		self.Ntot += 1
 		if (lh0 > self.lh) or (lh0 > self.lh + np.log(np.random.uniform())): #Acceptance condition for log-likelihoods!!!
 			self.point = p0
 			self.lh = lh0

@@ -4,6 +4,7 @@ from itertools import product
 
 class GridScan(Scan):
 	def run(self):
+		Ntot = 0
 		if isinstance(self.N_iters, int):
 			self.N_iters = [self.N_iters,]*self.Npars
 		ranges=[]
@@ -13,4 +14,5 @@ class GridScan(Scan):
 			self.points.append(r)
 			lh = self.likelihood(r)
 			self.lh_list.append(lh)
-			self.Ntot += 1		 
+			Ntot += 1
+		self.increasecounter(Ntot)		 

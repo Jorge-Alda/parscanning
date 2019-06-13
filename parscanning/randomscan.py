@@ -3,6 +3,7 @@ from .scan import Scan
 
 class RandomScan(Scan):
 	def run(self):
+		Ntot = 0
 		for _ in range(0, self.N_iters):
 			point = []
 			for p in range(0, self.Npars):
@@ -10,5 +11,6 @@ class RandomScan(Scan):
 			lh = self.likelihood(point)
 			self.points.append(point)
 			self.lh_list.append(lh)
-			self.Ntot += 1
+			Ntot += 1
+		self.increasecounter(Ntot)
 

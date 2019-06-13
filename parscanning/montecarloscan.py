@@ -11,6 +11,7 @@ class MontecarloScan(Scan):
 		for p in range(0, self.Npars):
 			self.variances[p] = (self.par_max[p]-self.par_min[p])/4					
 		N = 0
+		Ntot = 0
 		while N < self.N_iters:
 			valid = False
 			while not valid:
@@ -21,7 +22,8 @@ class MontecarloScan(Scan):
 				self.points.append(p0)
 				self.lh_list.append(lh0)
 				N += 1
-			self.Ntot +=1
+			Ntot +=1
+		self.increasecounter(Ntot)
 
 				
 

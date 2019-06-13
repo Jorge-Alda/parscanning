@@ -1,6 +1,10 @@
 import time
 from numpy.linalg import norm
 import numpy as np
+from multiprocessing import Process, Manager, Lock
+from ctypes import c_int
+
+Ntotlock = Lock()
 
 class Scan:
 	def __init__(self, likelihood, par_min, par_max, N_iters):
@@ -18,7 +22,8 @@ class Scan:
 		self.N_iters = N_iters
 		self.points = []
 		self.lh_list = []
-		self.Ntot = 0 
+		self.Ntot = 0
+		self.mp = False 
 	
 	def run(self):
 		raise NotImplementedError("You have to define the scan")
@@ -29,11 +34,19 @@ class Scan:
 		self.end = time.time()
 		print("Running time: " + str(self.end-self.start) + 's')
 
+	def increasecounter(self, Ntot):
+		if self.mp:
+			with Ntotlock:
+				self.Ntot.value += Ntot
+		else:
+			self.Ntot += Ntot
+
 	def run_mp(self, cores):
-		from multiprocessing import Process, Manager
+		self.mp = True
 		with Manager() as manager:
 			self.points = manager.list(self.points)
 			self.lh_list = manager.list(self.lh_list)
+			self.Ntot = manager.Value(c_int, self.Ntot)
 			processes = []
 			for i in range(0, cores):
 				p = Process(target = self.run)
@@ -42,11 +55,14 @@ class Scan:
 			for p in processes:
 				p.join()
 			self.points = list(self.points)
-			self.lh_list = list(self.lh_list) 
+			self.lh_list = list(self.lh_list)
+			self.Ntot = int(self.Ntot.value)
+		self.mp = False 
 	
 	def clear(self):
 		self.points = []
 		self.lh_list = []
+		self.Ntot = 0
 
 	def get_points(self):
 		return self.points
@@ -90,3 +106,4 @@ class Scan:
 
 	def acceptance(self):
 		return len(self.points)/self.Ntot
+
