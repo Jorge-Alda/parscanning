@@ -2,14 +2,14 @@ from .scan import Scan
 import numpy as np
 
 class MontecarloScan(Scan):
-	def __init__(self, likelihood, par_min, par_max, N_iters, bf):
+	def __init__(self, likelihood, par_min, par_max, N_iters, bf, varsize=0.25):
 		Scan.__init__(self, likelihood, par_min, par_max, N_iters)
 		self.bf = np.array(bf)
 		self.lh = self.likelihood(self.bf)
 	def run(self):
 		self.variances = np.zeros(self.Npars)
 		for p in range(0, self.Npars):
-			self.variances[p] = (self.par_max[p]-self.par_min[p])/4					
+			self.variances[p] = (self.par_max[p]-self.par_min[p])*varsize					
 		N = 0
 		Ntot = 0
 		while N < self.N_iters:
