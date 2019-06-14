@@ -1,7 +1,7 @@
 import time
 from numpy.linalg import norm
 import numpy as np
-from multiprocessing import Process, Manager, Lock
+from multiprocessing import Process, Manager, Lock, Pool
 from ctypes import c_int
 
 Ntotlock = Lock()
@@ -18,7 +18,7 @@ class Scan:
 			self.par_min = par_min
 			self.par_max = par_max
 		else:
-			raise Exception("The length of the bounds of the parameter doesn't match!")
+			raise Exception("The length of the limits of the parameter doesn't match!")
 		self.N_iters = N_iters
 		self.points = []
 		self.lh_list = []
@@ -51,6 +51,7 @@ class Scan:
 			for i in range(0, cores):
 				p = Process(target = self.run)
 				p.start()
+				np.random.seed(int(p.pid + time.time())) #We have to reseed each process, or else they will produce the same random numbers
 				processes.append(p)
 			for p in processes:
 				p.join()
@@ -58,6 +59,12 @@ class Scan:
 			self.lh_list = list(self.lh_list)
 			self.Ntot = int(self.Ntot.value)
 		self.mp = False 
+
+	def run_mp_time(self, cores):
+		self.start = time.time()
+		self.run_mp(cores)
+		self.end = time.time()
+		print("Running time: " + str(self.end-self.start) + 's')
 	
 	def clear(self):
 		self.points = []
@@ -107,3 +114,27 @@ class Scan:
 	def acceptance(self):
 		return len(self.points)/self.Ntot
 
+	def bestpoint(self):
+		return self.points[np.argmax(self.lh_list)]
+
+	def expectedvalue(self, func):
+		lhmax = np.max(self.lh_list)
+		num = 0
+		den = 0
+		for p, l in zip(self.points, self.lh_list):
+			expl = np.exp(l-lhmax)
+			num += func(p) * expl
+			den += expl
+		return num/den
+
+	def expectedvalue_mp(self, func, cores):
+		lhmax = np.max(self.lh_list)
+		num = 0
+		den = 0
+		with Pool(processes=cores) as pool:
+			flist = pool.map(func, self.points)
+		for i, l in enumerate(self.lh_list):
+			expl = np.exp(l-lhmax)
+			num += flist[i] * expl
+			den += expl
+		return num/den		
