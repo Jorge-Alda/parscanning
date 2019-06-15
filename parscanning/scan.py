@@ -25,12 +25,12 @@ class Scan:
 		self.Ntot = 0
 		self.mp = False 
 	
-	def run(self):
+	def run(self, *args):
 		raise NotImplementedError("You have to define the scan")
 	
-	def run_time(self):
+	def run_time(self, *args):
 		self.start = time.time()
-		self.run()
+		self.run(*args)
 		self.end = time.time()
 		print("Running time: " + str(self.end-self.start) + 's')
 
@@ -41,7 +41,7 @@ class Scan:
 		else:
 			self.Ntot += Ntot
 
-	def run_mp(self, cores):
+	def run_mp(self, cores, *args):
 		self.mp = True
 		with Manager() as manager:
 			self.points = manager.list(self.points)
@@ -49,7 +49,7 @@ class Scan:
 			self.Ntot = manager.Value(c_int, self.Ntot)
 			processes = []
 			for i in range(0, cores):
-				p = Process(target = self.run)
+				p = Process(target = self.run, args = args)
 				p.start()
 				np.random.seed(int(p.pid + time.time())) #We have to reseed each process, or else they will produce the same random numbers
 				processes.append(p)
