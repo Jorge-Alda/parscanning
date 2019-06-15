@@ -6,10 +6,11 @@ class MontecarloScan(Scan):
 		Scan.__init__(self, likelihood, par_min, par_max, N_iters)
 		self.bf = np.array(bf)
 		self.lh = self.likelihood(self.bf)
+		self.varsize = varsize
 	def run(self):
 		self.variances = np.zeros(self.Npars)
 		for p in range(0, self.Npars):
-			self.variances[p] = (self.par_max[p]-self.par_min[p])*varsize					
+			self.variances[p] = (self.par_max[p]-self.par_min[p])*self.varsize					
 		N = 0
 		Ntot = 0
 		while N < self.N_iters:

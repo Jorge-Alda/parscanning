@@ -1,4 +1,1 @@
 numpy
-multiprocessing
-itertools
-ctypes
