@@ -74,8 +74,14 @@ class Scan:
 	def get_points(self):
 		return self.points
 
-	def get_lh_list(self):
-		return self.lh_list
+	def get_lh_list(self, index=None):
+		if index == None:
+			return self.lh_list
+		else:
+			s = []
+			for i in range(0, len(self.lh_list)):
+				s.append(self.lh_list[i][index])
+			return s
 
 	def get_point_series(self, coord):
 		s = []

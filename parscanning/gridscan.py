@@ -34,7 +34,7 @@ class GridScan(Scan):
 		self.points += points
 		self.lh_list += lh
 
-	def meshdata(self):
+	def meshdata(self, index=None):
 		ranges=[]
 		for i in range(0, self.Npars):
 			ranges.append(np.linspace(self.par_min[i], self.par_max[i], self.N_iters[i]))
@@ -42,7 +42,8 @@ class GridScan(Scan):
 		rc = []
 		for i in range(0, self.Npars):
 			rc.append(range(self.N_iters[i]))
+		lh_list = self.get_lh_list(index)
 		for t, c in enumerate(product(*rc)):
-			lhgrid[c] = self.lh_list[t]
+			lhgrid[c] = lh_list[t]
 		return (*ranges, lhgrid)
 
