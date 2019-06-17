@@ -45,5 +45,5 @@ class GridScan(Scan):
 		lh_list = self.get_lh_list(index)
 		for t, c in enumerate(product(*rc)):
 			lhgrid[c] = lh_list[t]
-		return (*ranges, lhgrid)
+		return (*ranges, lhgrid.T)
 
