@@ -3,6 +3,7 @@ from numpy.linalg import norm
 import numpy as np
 from multiprocessing import Process, Manager, Lock, Pool
 from ctypes import c_int
+from itertools import product
 
 Ntotlock = Lock()
 
@@ -123,22 +124,25 @@ class Scan:
 	def bestpoint(self):
 		return self.points[np.argmax(self.lh_list)]
 
-	def expectedvalue(self, func):
+	def expectedvalue(self, func, *args):
 		lhmax = np.max(self.lh_list)
 		num = 0
 		den = 0
 		for p, l in zip(self.points, self.lh_list):
 			expl = np.exp(l-lhmax)
-			num += func(p) * expl
+			num += func(p, *args) * expl
 			den += expl
 		return num/den
 
-	def expectedvalue_mp(self, func, cores):
+	def expectedvalue_mp(self, func, cores, *args):
 		lhmax = np.max(self.lh_list)
 		num = 0
 		den = 0
 		with Pool(processes=cores) as pool:
-			flist = pool.map(func, self.points)
+			argl = []
+			for arg in args:
+				argl.append([arg])
+			flist = pool.starmap(func, product(self.points, *argl))
 		for i, l in enumerate(self.lh_list):
 			expl = np.exp(l-lhmax)
 			num += flist[i] * expl
