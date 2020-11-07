@@ -102,13 +102,12 @@ class Scan:
 				den += 1/d**4
 		return num/den
 
-	def write(self, fout):
-		f = open(fout, 'at')
-		for p, l in zip(self.points, self.lh_list):
-			for i in range(0, self.Npars):
-				f.write(str(p[i])+'\t')
-			f.write(str(l)+'\n')
-		f.close()
+	def write(self, fout, mode='wt'):
+		with open(fout, mode) as f:
+			for p, l in zip(self.points, self.lh_list):
+				for i in range(0, self.Npars):
+					f.write(str(p[i])+'\t')
+				f.write(str(l)+'\n')
 
 	def inthebox(self, point):
 		for p in range(0, self.Npars):
