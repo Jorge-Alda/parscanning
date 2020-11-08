@@ -59,6 +59,11 @@ class MLScan(Scan):
             val_pred = self.model.predict(val_X)
             print(metrics(val_pred, val_y))    
 
+    def save_validation(self, fname):
+        data = self.val_X.copy(deep=True)
+        data['logL'] = self.val_y
+        data.to_csv(fname, sep='\t', header=False, index=False)
+
     def guess_lh(self, x):
         return float(self.model.predict( np.array([x,])) )
 
