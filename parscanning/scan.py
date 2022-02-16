@@ -4,6 +4,7 @@ import numpy as np
 from multiprocessing import Process, Manager, Lock, Pool
 from ctypes import c_int
 from itertools import product
+import pandas as pd
 
 Ntotlock = Lock()
 
@@ -108,6 +109,12 @@ class Scan:
 				for i in range(0, self.Npars):
 					f.write(str(p[i])+'\t')
 				f.write(str(l)+'\n')
+				
+	def save_csv(self, fout):
+	    df_points = pd.DataFrame(self.points, columns=['x','y'])
+	    df_lh = pd.DataFrame(self.lh_list)
+	    df_total = pd.concat([df_points, df_lh], axis=1, join='outer')
+	    df_total.to_csv(fout, sep='\t', index=False)
 
 	def inthebox(self, point):
 		for p in range(0, self.Npars):
