@@ -4,6 +4,7 @@ import numpy as np
 from itertools import product
 from sklearn.model_selection import train_test_split
 import pickle
+import pandas as pd
 
 
 class MLScan(Scan):
@@ -12,6 +13,8 @@ class MLScan(Scan):
         self.bf = np.array(bf)
         self.lh = self.likelihood(self.bf)
         self.cutoff = cutoff
+        self.lenf = len(self.bf)
+        self.featurenames = [f'f{i}' for i in range(self.lenf)]
 
     def init_ML(self, model, varsize=0.5):
         self.model = model
@@ -33,7 +36,7 @@ class MLScan(Scan):
         while len(xlist) < num:
             Ntot += 1
             x0 = self.bf + np.random.randn(self.Npars) * self.variances
-            if self.guess_lh(x0) > self.lh + np.log(np.random.uniform()):
+            if self.guess_single(x0) > self.lh + np.log(np.random.uniform()):
                 xlist.append(x0)
         self.Ntot += Ntot
         return xlist
@@ -51,6 +54,8 @@ class MLScan(Scan):
 
     def train_pred(self, X, y, metrics=None):
         train_X, val_X, train_y, val_y = train_test_split(X, y)
+        if isinstance(X, pd.Dataframe):
+            self.featurenames = list(X.keys())
         self.val_X = val_X
         self.val_y = val_y
         self.model.fit(train_X, train_y)
@@ -60,12 +65,16 @@ class MLScan(Scan):
             print(metrics(val_pred, val_y))    
 
     def save_validation(self, fname):
-        data = self.val_X.copy(deep=True)
+        data = pd.DataFrame(self.val_X)
         data['logL'] = self.val_y
         data.to_csv(fname, sep='\t', header=False, index=False)
 
     def guess_lh(self, x):
-        return float(self.model.predict( np.array([x,])) )
+        return self.model.predict(x)
+        
+    def guess_single(self, x):
+        dfx = pd.DataFrame(np.array(x).reshape(1, self.lenf), columns=self.featurenames)
+        return float(self.model.predict(dfx))
 
     def saveML(self, fname):
         with open(fname, 'wb') as f:
