@@ -54,7 +54,7 @@ class MLScan(Scan):
 
     def train_pred(self, X, y, metrics=None):
         train_X, val_X, train_y, val_y = train_test_split(X, y)
-        if isinstance(X, pd.Dataframe):
+        if isinstance(X, pd.DataFrame):
             self.featurenames = list(X.keys())
         self.val_X = val_X
         self.val_y = val_y
