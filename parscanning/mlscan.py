@@ -58,7 +58,7 @@ class MLScan(Scan):
             self.featurenames = list(X.keys())
         self.val_X = val_X
         self.val_y = val_y
-        self.model.fit(train_X, train_y)
+        self.model.fit(train_X, train_y, eval_set=[(val_X, val_y)])
         self.started_pred = True
         if metrics is not None:
             val_pred = self.model.predict(val_X)
